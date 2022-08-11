@@ -14,6 +14,7 @@ namespace practice
             //Getter 와 Setter의 역할을 함 → 유니티에서는 프로퍼티가 있기에 getter와 setter를 사용하지 않음 / 오히려 언리얼에서 getter,setter를 쓴다.
             //"속성"이라는 뜻을 가지고 있음
             //속성값을 반환하거나 새로운 값을 할당 가능
+            // 프로퍼티
 
             Person person = new Person();
             person.Age = 10;
