@@ -28,12 +28,12 @@ namespace practice
             archer.bowWho();
             archer.gunWho();
         }
-        interface Bow
+        interface IBow
         {
             int bowdamage { get; set; }
             void bowWho();
         }
-        interface Gun
+        interface IGun
         {
             int gundamage { get; set; }
             void gunWho();
