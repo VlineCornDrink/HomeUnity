@@ -1,5 +1,5 @@
 using System;
-
+using System.Diagnostics;
 
 namespace UnityPractice
 {
@@ -22,7 +22,7 @@ namespace UnityPractice
     // 9. 꾸미기
 
 
-    class Character
+    class Game
     {
 
         ConsoleKeyInfo inputKey; //입력받을 키
@@ -31,26 +31,32 @@ namespace UnityPractice
 
         int[] bulletPos; // 총알 좌표
         int[][] tempbulletPos; // 모든 총알 좌표 집합
-        int bulletNum = 0; // 총알 개수
+        int bulletNum = 0; // 현재 총알 개수
+        int bulletmagazine = 50; //총알 탄창
         bool isBullet = false; // 총알 있는지 없는지
+
+        bool isFinish= false; // 게임 끝났는지 여부
+        int score = 0;
 
 
 
         // 게임창 좌표 : (1,1)~ (40,1)
         //                 |      |
         //               (1,20)~(40,20)
-        const int StartX = 1; // 게임 구역 시작지점 X좌표
-        const int StartY = 1; // 게임 구역 시작지접 Y좌표
+        const int STARTX = 1; // 게임 구역 시작지점 X좌표
+        const int STARTY = 1; // 게임 구역 시작지접 Y좌표
         const int WIDE = 40;  // 게임 구역 종료지점 X좌표
         const int HEIGHT = 20; // 게임 구역 종료지접 Y좌표
 
-
-
-        public Character()
+        enum Vector {UP, RIGHT,DOWN, LEFT,X}
+        Vector vector = Vector.UP;
+        public Game()
         {
             tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
             bulletPos = new int[] { 5, 5 }; // 탱크 총알 초기 위치
-            tempbulletPos = new int[50][];
+            tempbulletPos = new int[bulletmagazine][];
+            tempbulletPos[0] = new int[2] { 0, 0 };
+
             Console.CursorVisible = false; // 깜빡이는 커서 안보이게
         }
 
@@ -60,8 +66,9 @@ namespace UnityPractice
         {
             Console.Title = "Tank Shooting";
             Console.SetWindowSize(WIDE, HEIGHT);
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.BackgroundColor = ConsoleColor.Black;
         }
+
 
         /*---------------------------------------------------------------------------------*/  // 키 입력 관련 함수
         //키를 입력받는 함수
@@ -72,23 +79,38 @@ namespace UnityPractice
                 inputKey = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
             }
         }
+
+        public void ReturnVector()
+        {
+            if (vector == Vector.X)
+            {
+                vector = Vector.UP;
+            }
+        }
         /*---------------------------------------------------------------------------------*/   // 총알 관련 함수
 
         // spacebar를 누른 시점에서의 총알 발사위치 받아서 총알 좌표집합 변수에 추가하는 함수
         public void SumBulletPos(int[] _bulletPos)
         {
-            bulletNum++;
+            bulletNum++; // 쏜 총알의 개수 1증가
+            if (bulletNum > bulletmagazine-1) // 총알이 탄창에 들어갈 수 있는 총알 개수보다 많아지면
+            {
+                bulletNum = 0; //자동 장전(총알 초기화)
+            }
             tempbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
             // tempbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
             // tempbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
             // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : tempbulletPos[3][0] 
+       
+
 
         }
         // 총알 발사 위치 탱크 앞부분으로 초기화하는 함수
         public void ResetBulletPos()
         {
-            bulletPos[0] = tankPos[0] - 1; // bulletPos X좌표 >= StartX  / tankPos X좌표 >= StartX
-            bulletPos[1] = tankPos[1] - 1; //  bulletPos Y좌표 >= StartY  / tankPos Y좌표 >= StartY
+            
+            bulletPos[0] = tankPos[0] - 1; // bulletPos X좌표 >= STARTX  / tankPos X좌표 >= STARTX
+            bulletPos[1] = tankPos[1] - 1; //  bulletPos Y좌표 >= STARTY  / tankPos Y좌표 >= STARTY
         }
 
 
@@ -96,7 +118,7 @@ namespace UnityPractice
         public void WriteBullet(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서 
-            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("▲"); // '▲'을 그린다.
 
         }
@@ -108,16 +130,16 @@ namespace UnityPractice
             {
                 for (int i = 1; i <= bulletNum; i++) //모든 총알에 대해서
                 {
-                    if (tempbulletPos[i][0] >= 1 && tempbulletPos[i][0] <=WIDE) // 총알 좌표 게임창 범위에 있는지 검사
+                    if (tempbulletPos[i][0] >= STARTX-1 && tempbulletPos[i][0] <= WIDE-1) // 총알 좌표 게임창 범위에 있는지 검사
                     {
-                        if (tempbulletPos[i][1] >= 1 && tempbulletPos[i][1] <= HEIGHT) // 범위에 있으면
+                        if (tempbulletPos[i][1] >= STARTX-1 && tempbulletPos[i][1] <= HEIGHT-1) // 범위에 있으면
                         {
                             WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
                             tempbulletPos[i][1]--; //총알 움직이는 코드
                         }
                         else // 총알 좌표 X는 게임창 범위에 있지만 Y가 해당되지 않는 경우 
                         {
-                            Console.SetCursorPosition(0, 0); 
+                            Console.SetCursorPosition(0, 0);
                             Console.WriteLine(" "); // 0,0으로 간뒤에 총알 지워주기
                         }
                     }
@@ -125,12 +147,12 @@ namespace UnityPractice
                     {
                         Console.SetCursorPosition(0, 0);
                         Console.WriteLine(" ");  // 0,0으로 간뒤에 총알 지워주기
-                    }        
+                    }
                 }
 
             }
-        } 
-   
+        }
+
         /*---------------------------------------------------------------------------------*/     //탱크 관련 함수
 
         // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 ■을 찍는 함수
@@ -153,17 +175,17 @@ namespace UnityPractice
         // 탱크 좌표 게임창 범위에 있는지 검사 후 끝에 있는 값으로 초기화
         public void InspectTankPos(int[] _tankpos)
         {
-            if (_tankpos[0] < StartX) // 탱크의 X좌표 시작지점보다 작은경우
+            if (_tankpos[0] < STARTX) // 탱크의 X좌표 시작지점보다 작은경우
             {
-                _tankpos[0] = StartX;
+                _tankpos[0] = STARTX;
             }
-            else if (_tankpos[0] >= StartX && _tankpos[0] <= WIDE) // 탱크의 X좌표는 게임창에 들어있지만 Y좌표는 그렇지 않는 경우
+            else if (_tankpos[0] >= STARTX && _tankpos[0] <= WIDE) // 탱크의 X좌표는 게임창에 들어있지만 Y좌표는 그렇지 않는 경우
             {
-                if (_tankpos[1] < StartY)
+                if (_tankpos[1] < STARTY)
                 {
-                    _tankpos[1] = StartY;
+                    _tankpos[1] = STARTY;
                 }
-                else if(_tankpos[1] > HEIGHT) // 탱크의 X좌표 종료지점보다 큰 경우
+                else if (_tankpos[1] > HEIGHT) // 탱크의 X좌표 종료지점보다 큰 경우
                 {
                     _tankpos[1] = HEIGHT;
                 }
@@ -172,7 +194,7 @@ namespace UnityPractice
             {
                 _tankpos[0] = WIDE;
             }
-           
+
         }
         /*---------------------------------------------------------------------------------*/  // 게임 돌아가는 로직
 
@@ -187,8 +209,7 @@ namespace UnityPractice
 
             ResetBulletPos(); // 총알 위치 탱크 위치에 따른 초기화
             DrawBullet(isBullet); // 총알 그리기
-
-
+ 
             switch (inputKey.Key) //키에 따른 작용
             {
                 case ConsoleKey.W: //W를 누르면 위로 올라가기
@@ -207,13 +228,14 @@ namespace UnityPractice
                     isBullet = true; //총알이 하나라도 발사되었다는 의미
                     SumBulletPos(bulletPos); //발사된 총알 좌표 추가
                     break;
-                case ConsoleKey.Tab:
-
+                case ConsoleKey.Tab: //UP → RIGHT → DOWN → LEFT → X
+                    vector++;
+                    ReturnVector(); //X라면은 UP으로 바꾸기(LEFT → Up)
                     break;
 
             }
 
-            System.Threading.Thread.Sleep(50); //루프 돌기전 0.05초 대기
+            System.Threading.Thread.Sleep(200); //루프 돌기전 0.05초 대기
         }
 
 
@@ -221,18 +243,30 @@ namespace UnityPractice
 
         static void Main(string[] args)
         {
-            Character character = new Character(); // Character 객체 생성
+            Game game = new Game(); // Character 객체 생성
+            Stopwatch stopwatch = new Stopwatch(); // 게임 제한 시간
 
-            character.ConsoleSetting();
-
+            game.ConsoleSetting();
+            stopwatch.Start();
             while (true)//무한 루프
             {
-                
-                character.Input(); // 입력받고
-                character.Logic(); // 입력받은 걸 경우에 따라 좌표 이동 및 해당좌표에 #찍기
 
+                game.Input(); // 입력받고
+                game.Logic(); // 입력받은 걸 경우에 따라 좌표 이동 및 해당좌표에 #찍기
+                game.score++;
+                if (game.score == 100)
+                {
+                    stopwatch.Stop();
+                    Console.Clear();
+                    Console.SetCursorPosition(0, HEIGHT / 2);
+                    Console.CursorSize = 100;
+                    Console.WriteLine("게임 끝");
+                    Console.WriteLine("Score : "+game.score);
+                    break;
+                }
             }
             Console.ReadKey();
+
         }
     }
 }
