@@ -196,7 +196,6 @@ namespace UnityPractice
                     Console.WriteLine("◀");
                     break;
             }
-
         }
 
 
@@ -267,7 +266,7 @@ namespace UnityPractice
         public void WriteTank(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Red; // 탱크 색깔은 빨간색
             Console.WriteLine("#"); // '#'을 그린다.
         }
 
