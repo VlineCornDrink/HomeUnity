@@ -48,14 +48,15 @@ namespace UnityPractice
         const int WIDE = 40;  // 게임 구역 종료지점 X좌표
         const int HEIGHT = 20; // 게임 구역 종료지접 Y좌표
 
-        enum Vector {UP, RIGHT,DOWN, LEFT,X}
-        Vector vector = Vector.UP;
+        enum Vector {UP, RIGHT,DOWN, LEFT, X }
+        Vector vector;
+        Vector[] SumVector;
         public Game()
         {
             tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
             bulletPos = new int[] { 5, 5 }; // 탱크 총알 초기 위치
-            tempbulletPos = new int[bulletmagazine][];
-            tempbulletPos[0] = new int[2] { 0, 0 };
+            tempbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 XY좌표
+            SumVector = new Vector[bulletmagazine];
 
             Console.CursorVisible = false; // 깜빡이는 커서 안보이게
         }
@@ -89,28 +90,30 @@ namespace UnityPractice
         }
         /*---------------------------------------------------------------------------------*/   // 총알 관련 함수
 
-        // spacebar를 누른 시점에서의 총알 발사위치 받아서 총알 좌표집합 변수에 추가하는 함수
-        public void SumBulletPos(int[] _bulletPos)
-        {
-            bulletNum++; // 쏜 총알의 개수 1증가
-            if (bulletNum > bulletmagazine-1) // 총알이 탄창에 들어갈 수 있는 총알 개수보다 많아지면
-            {
-                bulletNum = 0; //자동 장전(총알 초기화)
-            }
-            tempbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
-            // tempbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
-            // tempbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
-            // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : tempbulletPos[3][0] 
-       
-
-
-        }
         // 총알 발사 위치 탱크 앞부분으로 초기화하는 함수
         public void ResetBulletPos()
         {
-            
-            bulletPos[0] = tankPos[0] - 1; // bulletPos X좌표 >= STARTX  / tankPos X좌표 >= STARTX
-            bulletPos[1] = tankPos[1] - 1; //  bulletPos Y좌표 >= STARTY  / tankPos Y좌표 >= STARTY
+            switch (vector)
+            {
+                case Vector.UP:
+                    bulletPos[0] = tankPos[0]; 
+                    bulletPos[1] = tankPos[1] - 1;
+                    break;
+                case Vector.RIGHT:
+                    bulletPos[0] = tankPos[0] + 2;
+                    bulletPos[1] = tankPos[1];
+                    break;
+                case Vector.DOWN:
+                    bulletPos[0] = tankPos[0] + 1;
+                    bulletPos[1] = tankPos[1] + 2;
+                    break;
+                case Vector.LEFT:
+                    bulletPos[0] = tankPos[0] - 1;
+                    bulletPos[1] = tankPos[1] + 1;
+                    break;
+            }
+
+
         }
 
 
@@ -119,9 +122,24 @@ namespace UnityPractice
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("▲"); // '▲'을 그린다.
+            switch (vector)
+            {
+                case Vector.UP:
+                    Console.WriteLine("▲"); // '▲'을 그린다.
+                    break;
+                case Vector.RIGHT:
+                    Console.WriteLine("▶");
+                    break;
+                case Vector.DOWN:
+                    Console.WriteLine("▼");
+                    break;
+                case Vector.LEFT:
+                    Console.WriteLine("◀");
+                    break;
+            }
 
         }
+
 
         // 총알 그리는 함수
         public void DrawBullet(bool _isBullet)
@@ -134,8 +152,29 @@ namespace UnityPractice
                     {
                         if (tempbulletPos[i][1] >= STARTX-1 && tempbulletPos[i][1] <= HEIGHT-1) // 범위에 있으면
                         {
-                            WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
-                            tempbulletPos[i][1]--; //총알 움직이는 코드
+                            switch (SumVector[i - 1])
+                            {
+                                case Vector.UP:
+                                    WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
+                                    tempbulletPos[i][1]--; //총알 움직이는 코드
+                                    break; 
+                                case Vector.RIGHT:
+                                    WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
+                                    tempbulletPos[i][0]++; //총알 움직이는 코드
+                                    break;
+                                case Vector.DOWN:
+                                    WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
+                                    tempbulletPos[i][1]++; //총알 움직이는 코드
+                                    break;
+                                case Vector.LEFT:
+                                    WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); //총알 그려주기
+                                    tempbulletPos[i][0]--; //총알 움직이는 코드
+                                    break;
+                            }
+                    
+
+
+
                         }
                         else // 총알 좌표 X는 게임창 범위에 있지만 Y가 해당되지 않는 경우 
                         {
@@ -153,6 +192,20 @@ namespace UnityPractice
             }
         }
 
+        // spacebar를 누른 시점에서의 총알 발사위치 받아서 총알 좌표집합 변수에 추가하는 함수
+        public void SumBulletPos(int[] _bulletPos)
+        {
+            bulletNum++; // 쏜 총알의 개수 1증가
+            if (bulletNum > bulletmagazine-1) // 총알이 탄창에 들어갈 수 있는 총알 개수보다 많아지면
+            {
+                bulletNum = 0; //자동 장전(총알 초기화)
+            }
+            tempbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
+            SumVector[bulletNum] = vector;
+            // tempbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
+            // tempbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
+            // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : tempbulletPos[3][0] 
+        }
         /*---------------------------------------------------------------------------------*/     //탱크 관련 함수
 
         // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 ■을 찍는 함수
@@ -166,10 +219,33 @@ namespace UnityPractice
         //탱크의 위치를 받아 탱크(사각형) 모양 그리는 함수
         public void DrawTank(int[] _tankPos)
         {
-            WriteTank(_tankPos[0], _tankPos[1]);
-            WriteTank(_tankPos[0], _tankPos[1] + 1);
-            //WriteTank(_tankPos[0] + 1, _tankPos[1]);
-            WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+            switch (vector)
+            {
+                case Vector.UP: //탱크 방향 : 위쪽
+                    WriteTank(_tankPos[0], _tankPos[1]);
+                    WriteTank(_tankPos[0], _tankPos[1] + 1);
+                    //WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                    break;
+                case Vector.RIGHT: //탱크 방향 : 오른쪽
+                    WriteTank(_tankPos[0], _tankPos[1]);
+                    WriteTank(_tankPos[0], _tankPos[1] + 1);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                    //WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                    break;
+                case Vector.DOWN: //탱크 방향 : 아래쪽
+                    WriteTank(_tankPos[0], _tankPos[1]);
+                    //WriteTank(_tankPos[0], _tankPos[1] + 1);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                    break;
+                case Vector.LEFT: //탱크 방향 : 왼쪽
+                    //WriteTank(_tankPos[0], _tankPos[1]);
+                    WriteTank(_tankPos[0], _tankPos[1] + 1);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                    WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                    break;
+            }
         }
 
         // 탱크 좌표 게임창 범위에 있는지 검사 후 끝에 있는 값으로 초기화
@@ -235,7 +311,7 @@ namespace UnityPractice
 
             }
 
-            System.Threading.Thread.Sleep(200); //루프 돌기전 0.05초 대기
+            System.Threading.Thread.Sleep(25); //루프 돌기전 0.05초 대기
         }
 
 
@@ -253,17 +329,17 @@ namespace UnityPractice
 
                 game.Input(); // 입력받고
                 game.Logic(); // 입력받은 걸 경우에 따라 좌표 이동 및 해당좌표에 #찍기
-                game.score++;
-                if (game.score == 100)
-                {
-                    stopwatch.Stop();
-                    Console.Clear();
-                    Console.SetCursorPosition(0, HEIGHT / 2);
-                    Console.CursorSize = 100;
-                    Console.WriteLine("게임 끝");
-                    Console.WriteLine("Score : "+game.score);
-                    break;
-                }
+                //game.score++;
+                //if (game.score == 100)
+                //{
+                //    stopwatch.Stop();
+                //    Console.Clear();
+                //    Console.SetCursorPosition(0, HEIGHT / 2);
+                //    Console.CursorSize = 100;
+                //    Console.WriteLine("게임 끝");
+                //    Console.WriteLine("Score : "+game.score);
+                //    break;
+                //}
             }
             Console.ReadKey();
 
