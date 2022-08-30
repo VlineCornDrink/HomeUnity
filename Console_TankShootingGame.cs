@@ -2,7 +2,7 @@ using System;
 
 namespace UnityPractice
 {
-    // 키보드를 이용해 탱크를 움직이게하고 돌려가면서('TAB') 총을 통해 랜덤하게 나온 먹이를 죽이는 프로그램
+    // 일정시간동안 키보드를 이용해 탱크를 움직이게하고 회전해가면서('TAB') 총을 통해 랜덤하게 나온 먹이를 죽이는 프로그램
     // 단, 총은 스페이스 누르면 탱크 앞부분에서 총이 발사하는 프로그램
 
     // 1. 탱크 생성 및 움직이기 -완-
@@ -10,7 +10,7 @@ namespace UnityPractice
     // 3. 여러방향 총알 발사 -완-
     // 4. 탱크 회전 및 발사 -완-
     // 5. 먹이 생성 및 죽이기 -완-
-    // 6. score
+    // 6. score -완-
     // 7. 코드 정리
     // 8. 탱크 모양 그리기
     // 9. 꾸미기
@@ -27,16 +27,15 @@ namespace UnityPractice
         int[][] tempbulletPos; // 모든 총알 좌표 집합
         int bulletNum = 0; // 발사된 총알 개수
         int bulletmagazine = 50; //총알 탄창
-        bool isBullet = false; // 총알 있는지 없는지
+        bool isBullet = false; // 총알 발사 여부
 
-        bool isFinish = true; // 게임 끝났는지 여부
         int score = 0; // 게임 점수
 
         Random random = new Random();
         int[] food = new int[2]; //먹이 변수
         bool isEat = false;
 
-        int timer=0; //시간
+        int timer = 0; //시간
 
         // 게임창 좌표 : (1,1)~ (40,1)
         //                 |      |
@@ -47,13 +46,13 @@ namespace UnityPractice
         const int HEIGHT = 20; // 게임 구역 종료지접 Y좌표
 
         enum Vector { UP, RIGHT, DOWN, LEFT, X }
-        Vector vector; // 탱크 방향 및 총알 방향
-        Vector[] SumVector; // 발사된 총알 방향 집합
+        Vector vector; // 탱크 방향
+        Vector[] SumVector; // 총알이 발사될 때의 탱크 방향 집합
 
         public Game()
         {
             tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
-            bulletPos = new int[] { 5, 5 }; 
+            bulletPos = new int[2]; //bulletPos[0] : 발사 총알 위치의 X좌표 , bulletPos[1] : 발사 총알 위치의 Y좌표
             tempbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 발사된 총알 좌표 모음
             SumVector = new Vector[bulletmagazine]; // 총알 탄창 개수만큼의 총알 방향 모음
             food = new int[] { 10, 10 }; //먹이 초기 위치
@@ -67,29 +66,29 @@ namespace UnityPractice
         public void ConsoleSetting()
         {
             Console.Title = "Tank Shooting";
-            Console.SetWindowSize(WIDE+20, HEIGHT+20);
+            Console.SetWindowSize(WIDE + 20, HEIGHT + 20); // 콘솔창 크기는 게임창 크기보다 더 크게
             Console.BackgroundColor = ConsoleColor.Black;
         }
-
+        // 콘솔 게임창 그리기
         public void ConsoleBackGround()
         {
-            for (int i = 0; i < WIDE+1; i++)
+            for (int i = 0; i < WIDE + 1; i++)
             {
-                Console.SetCursorPosition(i,0);
+                Console.SetCursorPosition(i, 0);
                 Console.Write("-");
-                Console.SetCursorPosition(i, HEIGHT+1);
+                Console.SetCursorPosition(i, HEIGHT + 1);
                 Console.Write("-");
             }
             for (int i = 0; i < HEIGHT + 1; i++)
             {
                 Console.SetCursorPosition(0, i);
                 Console.Write("|");
-                Console.SetCursorPosition(WIDE+1, i);
+                Console.SetCursorPosition(WIDE + 1, i);
                 Console.Write("|");
             }
 
         }
-
+        // 게임이 끝난뒤 콘솔에 출력할 내용 함수
         public void GameOver()
         {
             Console.Clear();
@@ -109,7 +108,7 @@ namespace UnityPractice
                 inputKey = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
             }
         }
-        // vector의 방향 LEFT → UP으로 돌아갈려는 함수
+        // 탱크 회전할 때 탱크의 방향 LEFT → UP으로 돌아갈려는 함수
         public void ReturnVector()
         {
             if (vector == Vector.X)
@@ -138,12 +137,12 @@ namespace UnityPractice
                     _food[1] = random.Next(STARTY, HEIGHT); //먹이변수의 Y좌표 다시 랜덤 할당
                     isEat = true; // 먹혔다
                     score++; //점수 증가
-                    
+
                 }
             }
             if (!isEat)
             {
-                 WriteFood(_food[0], _food[1]);
+                WriteFood(_food[0], _food[1]);
             }
             isEat = false; // 먹혔을 시 다음번에 먹혔는지 확인하기 위해 할당
         }
@@ -182,10 +181,10 @@ namespace UnityPractice
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서 
             Console.ForegroundColor = ConsoleColor.Red;
-            switch (vector)
+            switch (vector) // 탱크의 방향에 따라 총알 그림 결정
             {
                 case Vector.UP:
-                    Console.WriteLine("▲"); // '▲'을 그린다.
+                    Console.WriteLine("▲");
                     break;
                 case Vector.RIGHT:
                     Console.WriteLine("▶");
@@ -221,7 +220,7 @@ namespace UnityPractice
                                 case Vector.RIGHT: //발사된 총알의 방향이 오른쪽이라면
                                     WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
                                     tempbulletPos[i][0]++; // 오른쪽으로 계속 이동
-                                    break; 
+                                    break;
                                 case Vector.DOWN: //발사된 총알의 방향이 아래라면
                                     WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
                                     tempbulletPos[i][1]++; // 아래쪽으로 계속 이동
@@ -339,7 +338,7 @@ namespace UnityPractice
 
             ResetBulletPos(); // 탱크 앞부분으로 총알 발사 좌표 초기화
             DrawBullet(isBullet); // 모든 총알 그리기
-            DrawFood(food);
+            DrawFood(food); // 먹이 그리기
 
             switch (inputKey.Key) //키에 따른 작용
             {
@@ -359,8 +358,8 @@ namespace UnityPractice
                     isBullet = true; //총알이 하나라도 발사되었다는 의미
                     SumBulletPos(bulletPos); // 발사된 총알 좌표 추가
                     break;
-                case ConsoleKey.Tab: //UP → RIGHT → DOWN → LEFT → X
-                    vector++;
+                case ConsoleKey.Tab: // Tab을 누르면 탱크 회전
+                    vector++; //탱크 방향 변경(UP → RIGHT → DOWN → LEFT → X)
                     ReturnVector(); //X라면은 UP으로 바꾸기(LEFT → Up)
                     break;
 
@@ -382,11 +381,11 @@ namespace UnityPractice
             {
                 game.Input(); // 입력받고
                 game.Logic(); // 게임 돌리기
-                game.timer++;
-                if (game.timer==100) // 점수가 30점이 되면
+                game.timer++; // 타이머
+                if (game.timer == 100) // 시간 100되면
                 {
-                    game.GameOver();
-                    break;
+                    game.GameOver(); //게임종료
+                    break; // 반복 탈출
                 }
             }
             Console.ReadKey();
