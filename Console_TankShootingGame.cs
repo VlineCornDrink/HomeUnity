@@ -262,12 +262,19 @@ namespace UnityPractice
         }
         /*---------------------------------------------------------------------------------*/     //탱크 관련 함수
 
-        // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 #을 찍는 함수
+        // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 0을 찍는 함수
         public void WriteTank(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서
             Console.ForegroundColor = ConsoleColor.Red; // 탱크 색깔은 빨간색
-            Console.WriteLine("#"); // '#'을 그린다.
+            Console.WriteLine("0"); // '#'을 그린다.
+        }
+        // 탱크 바주카포를 그리기 위해 좌표를 받아 해당 좌표에 가서 X를 찍는 함수
+        public void WriteTank2(int x, int y) 
+        {
+            Console.SetCursorPosition(x, y); // x,y 로 가서
+            Console.ForegroundColor = ConsoleColor.DarkRed; // 색깔은 다크레드
+            Console.WriteLine("X"); // 'X'을 그린다.
         }
 
         //탱크의 위치를 받아 탱크(사각형) 모양 그리는 함수
@@ -276,22 +283,23 @@ namespace UnityPractice
             switch (vector) // 탱크의 방향에 따라서 모양 다르게 그리기
             {
                 case Vector.UP: //탱크 방향 : 위쪽
-                    WriteTank(_tankPos[0], _tankPos[1]);
+                    WriteTank2(_tankPos[0], _tankPos[1]);
                     WriteTank(_tankPos[0], _tankPos[1] + 1);
                     WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+
                     break;
                 case Vector.RIGHT: //탱크 방향 : 오른쪽
                     WriteTank(_tankPos[0], _tankPos[1]);
                     WriteTank(_tankPos[0], _tankPos[1] + 1);
-                    WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                    WriteTank2(_tankPos[0] + 1, _tankPos[1]);
                     break;
                 case Vector.DOWN: //탱크 방향 : 아래쪽
                     WriteTank(_tankPos[0], _tankPos[1]);
                     WriteTank(_tankPos[0] + 1, _tankPos[1]);
-                    WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                    WriteTank2(_tankPos[0] + 1, _tankPos[1] + 1);
                     break;
                 case Vector.LEFT: //탱크 방향 : 왼쪽
-                    WriteTank(_tankPos[0], _tankPos[1] + 1);
+                    WriteTank2(_tankPos[0], _tankPos[1] + 1);
                     WriteTank(_tankPos[0] + 1, _tankPos[1]);
                     WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
                     break;
@@ -387,7 +395,7 @@ namespace UnityPractice
                     break; // 반복 탈출
                 }
             }
-            Console.ReadKey();
+            Console.ReadLine(); // 엔터를 눌러야 게임창 닫기
 
         }
     }
