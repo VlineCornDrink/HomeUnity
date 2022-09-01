@@ -65,13 +65,14 @@ namespace UnityPractice
         // 콘솔 게임 화면 설정하는 함수
         public void ConsoleSetting()
         {
-            Console.Title = "Tank Shooting";
+            Console.Title = "Tank Shooting"; // 콘솔창 이름
             Console.SetWindowSize(WIDE + 20, HEIGHT + 20); // 콘솔창 크기는 게임창 크기보다 더 크게
-            Console.BackgroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Black; // 콘솔창 배경화면 : 검정색
         }
         // 콘솔 게임창 그리기
         public void ConsoleBackGround()
         {
+            Console.ForegroundColor = ConsoleColor.White;  // 게임창 둘레 색깔 : 하얀색
             for (int i = 0; i < WIDE + 1; i++)
             {
                 Console.SetCursorPosition(i, 0);
@@ -87,15 +88,6 @@ namespace UnityPractice
                 Console.Write("|");
             }
 
-        }
-        // 게임이 끝난뒤 콘솔에 출력할 내용 함수
-        public void GameOver()
-        {
-            Console.Clear();
-            Console.SetCursorPosition(0, HEIGHT / 2);
-            Console.CursorSize = 100;
-            Console.WriteLine("GAME OVER");
-            Console.WriteLine("Score : " + score);
         }
 
 
@@ -121,8 +113,8 @@ namespace UnityPractice
         public void WriteFood(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서
-            Console.ForegroundColor = ConsoleColor.Blue; //먹이 색깔은 파란색
-            Console.WriteLine("@"); // '@'을 그린다.
+            Console.ForegroundColor = ConsoleColor.Red; //먹이 색깔은 빨간색
+            Console.WriteLine("■"); // '■'을 그린다.
         }
         //모든 먹이들을 그리는 함수
         public void DrawFood(int[] _food)
@@ -179,8 +171,8 @@ namespace UnityPractice
         // 좌표를 받아 해당 좌표에 가서 총알그림(▲,▶,▼,◀)을 찍는 함수
         public void WriteBullet(int x, int y)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow; // 총알 색깔 : 노란색
             Console.SetCursorPosition(x, y); // x,y 로 가서 
-            Console.ForegroundColor = ConsoleColor.Red;
             switch (vector) // 탱크의 방향에 따라 총알 그림 결정
             {
                 case Vector.UP:
@@ -198,7 +190,7 @@ namespace UnityPractice
             }
         }
 
-
+  
         // 발사된 모든 총알 그리는 함수
         public void DrawBullet(bool _isBullet)
         {
@@ -256,6 +248,7 @@ namespace UnityPractice
             }
             tempbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
             SumVector[bulletNum] = vector; // 총알 방향 추가
+
             // tempbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
             // tempbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
             // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : tempbulletPos[3][0] 
@@ -266,15 +259,22 @@ namespace UnityPractice
         public void WriteTank(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서
-            Console.ForegroundColor = ConsoleColor.Red; // 탱크 색깔은 빨간색
+            Console.ForegroundColor = ConsoleColor.Green; // 탱크 색깔은 초록색
             Console.WriteLine("0"); // '#'을 그린다.
         }
         // 탱크 바주카포를 그리기 위해 좌표를 받아 해당 좌표에 가서 X를 찍는 함수
-        public void WriteTank2(int x, int y) 
+        public void WriteTank2(int x, int y)
         {
             Console.SetCursorPosition(x, y); // x,y 로 가서
-            Console.ForegroundColor = ConsoleColor.DarkRed; // 색깔은 다크레드
+            Console.ForegroundColor = ConsoleColor.Green; // 탱크 포 색깔은 다크초록색
             Console.WriteLine("X"); // 'X'을 그린다.
+        }
+
+        public void WriteTank3(int x, int y)
+        {
+            Console.SetCursorPosition(x, y); // x,y 로 가서
+            Console.ForegroundColor = ConsoleColor.DarkGreen; // 탱크 포 색깔은 다크초록색
+            Console.WriteLine("|"); // ''을 그린다.
         }
 
         //탱크의 위치를 받아 탱크(사각형) 모양 그리는 함수
@@ -285,8 +285,7 @@ namespace UnityPractice
                 case Vector.UP: //탱크 방향 : 위쪽
                     WriteTank2(_tankPos[0], _tankPos[1]);
                     WriteTank(_tankPos[0], _tankPos[1] + 1);
-                    WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
-
+                    WriteTank(_tankPos[0] + 1, _tankPos[1]+1);
                     break;
                 case Vector.RIGHT: //탱크 방향 : 오른쪽
                     WriteTank(_tankPos[0], _tankPos[1]);
@@ -375,14 +374,48 @@ namespace UnityPractice
             System.Threading.Thread.Sleep(25); //루프 돌기전 0.25초 대기
         }
 
+        public void GameStart()
+        {
+            Console.SetCursorPosition(0, HEIGHT / 2);
+            Console.WriteLine("Tank Shooting Game");
+            Console.WriteLine("(탱크 이동 : w,a,s,d / 총알 발사 : spacebar / 탱크 회전 : tab)");
+            Console.WriteLine("게임을 시작하실려면 아무키나 누르고 enter를 누르시오...");
+            Console.ReadLine();
+        }
+        // 게임이 끝난뒤 콘솔에 출력할 내용 함수
+        public void GameOver()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White; // 글씨 하얀색으로 작성
+            Console.SetCursorPosition(0, HEIGHT / 2);
+            
+            Console.CursorSize = 100;
+            Console.WriteLine("GAME OVER");
+            Console.WriteLine("Score : " + score);
+        }
 
+        // 게임이 끝난 뒤 다시한번 할 건지 여부
+        public bool OneMore()
+        {
+            while (true)
+            {
+                Console.Write("한번 더 하시겠습니까? ( Yes / No )");
+                string answer = Console.ReadLine();
+                if (answer.ToLower() == "yes")
+                {
+                    return true;
+                }
+                else if (answer.ToLower() == "no")
+                    return false;
+            }
+        }
 
 
         static void Main(string[] args)
         {
             Game game = new Game(); // Game 객체 생성
 
-
+            game.GameStart();
             game.ConsoleSetting();
             while (true)//무한 루프
             {
@@ -392,10 +425,18 @@ namespace UnityPractice
                 if (game.timer == 100) // 시간 100되면
                 {
                     game.GameOver(); //게임종료
-                    break; // 반복 탈출
+                    if (game.OneMore()) // 다시할거면
+                    {
+                        game.timer = 0; // 시간 초기화
+                        game.score = 0; //점수 초기화
+                        continue; // 계속 반복
+                    }
+                    else
+                    {
+                        break;// 반복 탈출
+                    }
                 }
             }
-            Console.ReadLine(); // 엔터를 눌러야 게임창 닫기
 
         }
     }
