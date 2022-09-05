@@ -14,20 +14,26 @@ using System;
 // 8. 탱크 모양 그리기  -완-
 // 9. 꾸미기  -완-
 
-// 완료는 다 했지만
-// 부족한 기능
-// : 먹이를 먹을때 제대로 안먹어짐
-// ㄴ 해결 불가 
-// : 탱크 TAB 을 누르면 멈춰서도 한번만 돌아가야하는데 여러번 돌아감
-// : 총알 같은 방향에는 한번만 쏘고싶음
-// : 탱크 이동도 한번누르면 여러번 이동함.
+// 문제점 : 다음 키 입력받기 전까지 입력받은 키 계속 적용
+// (EX) 제자리에서 TAB을 누르면 다음키 입력받기전까지 계속 회전
+// (EX) SPACEBAR 공격 이벤트를 누르면 다음키 입력받기 전까지 계속 총알 발사
+// 해결방법 : 입력받는 키를 배열로 전환하고 배열을 초기화해주는 함수를 만들어줌
+// 해결완료 : 총알 1발만 발사하거나 TAB키 한번만 회전이 가능해짐
 
+// 문제점2 : 먹이가 문자로 되어있어 잘 안먹어짐
+// 해결방법 : 먹이의 범위를 크게 만들어 맞히는 범위를 늘려줌
+
+// 문제점3 : 게임을 한번더 했을떄 새로운 게임이 시작되어야하는데
+// 그렇지않고 반복을 계속하게끔 짜서 이전이벤트가 새로운게임에 영향을 미침
+
+// 문제점4 : 코드 정리 ( 접근제한자라든지 아니면 여러 클래스로 구분할 수 있는지확인)
 
 
 class Game
 {
 
-    ConsoleKeyInfo inputKey; //입력받을 키
+    ConsoleKeyInfo[] SuminputKey; // 입력받은 키 집합
+    int keyNum = 0; // 입력받은 키 개수
 
     int[] tankPos; //탱크 좌표
 
@@ -57,6 +63,8 @@ class Game
     Vector vector; // 탱크 방향
     Vector[] SumVector; // (총알이 발사될 때의) 탱크 방향 집합
 
+    
+
 
 
 
@@ -67,7 +75,7 @@ class Game
         SumbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 모든 총알 좌표 집합
         SumVector = new Vector[bulletmagazine]; // 총알 탄창 개수만큼의 (총알이 발사될 때의) 탱크 방향 집합
         food = new int[] { 10, 10 }; //먹이 초기 위치
-
+        SuminputKey = new ConsoleKeyInfo[50]; 
 
         Console.CursorVisible = false; // 깜빡이는 커서 안보이게
     }
@@ -108,7 +116,17 @@ class Game
     {
         if (Console.KeyAvailable)  //키 누름을 사용할 수 있으면
         {
-            inputKey = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
+            SuminputKey[keyNum] = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
+        }
+    }
+    // 입력받은 키 개수를 올리고 SuminputKey 배열의 범위를 벗어나면 개수 초기화하는 함수
+    public void ResetKeyNum()
+    {
+        keyNum++; // 입력받은 키 개수 1 증가
+        if (keyNum == 50) // 배열의 범위를 벗어나면
+        {
+            Array.Clear(SuminputKey, 0, 50); // 배열 비우고
+            keyNum = 0; // 개수 초기화
         }
     }
     /*---------------------------------------------------------------------------------*/   // 먹이 관련 함수
@@ -117,7 +135,7 @@ class Game
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
         Console.ForegroundColor = ConsoleColor.Red; //먹이 색깔은 빨간색
-        Console.WriteLine("()"); // '()'을 그린다.
+        Console.WriteLine("W"); // '()'을 그린다.
     }
     //모든 먹이들을 그리는 함수
     public void DrawFood(int[] _food)
@@ -159,7 +177,7 @@ class Game
                 bulletPos[1] = tankPos[1] + 2;
                 break;
             case Vector.LEFT: // 탱크 방향  : LEFT
-                bulletPos[0] = tankPos[0] - 1;
+                bulletPos[0] = tankPos[0] - 2;
                 bulletPos[1] = tankPos[1] + 1;
                 break;
         }
@@ -260,7 +278,7 @@ class Game
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
         Console.ForegroundColor = ConsoleColor.Green; // 탱크 색깔은 초록색
-        Console.WriteLine("0"); // '0'을 그린다.
+        Console.WriteLine("O"); // '0'을 그린다.
     }
     // 탱크 포를 그리기 위해 좌표를 받아 해당 좌표에 가서 문자를 찍는 함수
     public void WriteTank2(int x, int y)
@@ -277,23 +295,39 @@ class Game
         {
             case Vector.UP: //탱크 방향 : 위쪽
                 WriteTank2(_tankPos[0], _tankPos[1]);
+                WriteTank(_tankPos[0] - 1, _tankPos[1] + 1);
                 WriteTank(_tankPos[0], _tankPos[1] + 1);
                 WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                WriteTank(_tankPos[0] - 1, _tankPos[1] + 2);
+                WriteTank(_tankPos[0], _tankPos[1] + 2);
+                WriteTank(_tankPos[0] + 1, _tankPos[1] + 2);
                 break;
             case Vector.RIGHT: //탱크 방향 : 오른쪽
+                WriteTank(_tankPos[0]-1, _tankPos[1] - 1);
+                WriteTank(_tankPos[0]-1, _tankPos[1]);
+                WriteTank(_tankPos[0]-1, _tankPos[1] + 1);
+                WriteTank(_tankPos[0], _tankPos[1] - 1);
                 WriteTank(_tankPos[0], _tankPos[1]);
                 WriteTank(_tankPos[0], _tankPos[1] + 1);
                 WriteTank2(_tankPos[0] + 1, _tankPos[1]);
                 break;
             case Vector.DOWN: //탱크 방향 : 아래쪽
+                WriteTank(_tankPos[0], _tankPos[1]-1);
+                WriteTank(_tankPos[0] + 1, _tankPos[1]-1);
+                WriteTank(_tankPos[0] + 2, _tankPos[1]-1);
                 WriteTank(_tankPos[0], _tankPos[1]);
                 WriteTank(_tankPos[0] + 1, _tankPos[1]);
+                WriteTank(_tankPos[0] + 2, _tankPos[1]);
                 WriteTank2(_tankPos[0] + 1, _tankPos[1] + 1);
                 break;
             case Vector.LEFT: //탱크 방향 : 왼쪽
                 WriteTank2(_tankPos[0], _tankPos[1] + 1);
                 WriteTank(_tankPos[0] + 1, _tankPos[1]);
                 WriteTank(_tankPos[0] + 1, _tankPos[1] + 1);
+                WriteTank(_tankPos[0] + 1, _tankPos[1] + 2);
+                WriteTank(_tankPos[0] + 2, _tankPos[1]);
+                WriteTank(_tankPos[0] + 2, _tankPos[1] + 1);
+                WriteTank(_tankPos[0] + 2, _tankPos[1] + 2);
                 break;
         }
     }
@@ -388,7 +422,8 @@ class Game
         DrawBullet(isBullet); // 모든 총알 그리기
         DrawFood(food); // 먹이 그리기
 
-        switch (inputKey.Key) //키에 따른 작용
+
+        switch (SuminputKey[keyNum].Key) //키에 따른 작용
         {
             case ConsoleKey.W: //W를 누르면 위로 올라가기
                 tankPos[1]--;
@@ -407,6 +442,7 @@ class Game
                 SumBulletPos(bulletPos); // 발사된 총알 좌표 추가
                 break;
             case ConsoleKey.Tab: // Tab을 누르면 탱크 회전
+                vector++; // 벡터 방향 전환
                 ReturnVector(); //X라면은 UP으로 바꾸기(LEFT → Up)
                 break;
 
@@ -425,8 +461,9 @@ class Game
         {
             game.Input(); // 입력받고
             game.Logic(); // 게임 돌리기
+            game.ResetKeyNum(); // 입력 점검
             game.timer++; // 시간 +
-            if (game.timer == 100) // 시간 100되면(게임 시간 제한)
+            if (game.timer == 100) // 시간 100되면(게임 제한 시간)
             {
                 game.GameOver(); //게임종료
                 if (game.OneMore()) // 다시할거면
