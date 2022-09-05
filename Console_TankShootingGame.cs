@@ -32,7 +32,7 @@ class Game
     int[] tankPos; //탱크 좌표
 
     int[] bulletPos; // 총알 발사되는 위치 좌표
-    int[][] tempbulletPos; // 모든 총알 좌표 집합
+    int[][] SumbulletPos; // 모든 총알 좌표 집합
     int bulletNum = 0; // 발사된 총알 개수
     int bulletmagazine = 50; //총알 탄창
     bool isBullet = false; // 총알 발사 여부
@@ -56,7 +56,6 @@ class Game
     enum Vector { UP, RIGHT, DOWN, LEFT, X }
     Vector vector; // 탱크 방향
     Vector[] SumVector; // (총알이 발사될 때의) 탱크 방향 집합
-    bool isSpin = default;
 
 
 
@@ -65,7 +64,7 @@ class Game
     {
         tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
         bulletPos = new int[2]; //bulletPos[0] : 발사 총알 위치의 X좌표 , bulletPos[1] : 발사 총알 위치의 Y좌표
-        tempbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 모든 총알 좌표 집합
+        SumbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 모든 총알 좌표 집합
         SumVector = new Vector[bulletmagazine]; // 총알 탄창 개수만큼의 (총알이 발사될 때의) 탱크 방향 집합
         food = new int[] { 10, 10 }; //먹이 초기 위치
 
@@ -104,7 +103,7 @@ class Game
 
 
     /*---------------------------------------------------------------------------------*/  // 키 입력 관련 함수
-                                                                                           // 키를 입력받는 함수
+    // 키를 입력받는 함수
     public void Input()
     {
         if (Console.KeyAvailable)  //키 누름을 사용할 수 있으면
@@ -113,19 +112,19 @@ class Game
         }
     }
     /*---------------------------------------------------------------------------------*/   // 먹이 관련 함수
-                                                                                            // 먹이 좌표로 가서 먹이 모양 그리는 함수
+    // 먹이 좌표로 가서 먹이 모양 그리는 함수
     public void WriteFood(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
         Console.ForegroundColor = ConsoleColor.Red; //먹이 색깔은 빨간색
-        Console.WriteLine("()"); // 'X'을 그린다.
+        Console.WriteLine("()"); // '()'을 그린다.
     }
     //모든 먹이들을 그리는 함수
     public void DrawFood(int[] _food)
     {
         for (int i = 1; i <= bulletNum; i++) // 모든 총알에 대해서
         {
-            if ((_food[0] == tempbulletPos[i][0]) && (_food[1] == tempbulletPos[i][1]))  // 먹이랑 부딪혔을 때(충돌)
+            if ((_food[0] == SumbulletPos[i][0]) && (_food[1] == SumbulletPos[i][1]))  // 먹이랑 부딪혔을 때(충돌)
             {
                 isEat = true; // 먹혔으므로
                 _food[0] = random.Next(STARTX, WIDE); //먹이변수의 X좌표 다시 랜덤 할당
@@ -137,7 +136,7 @@ class Game
         {
             WriteFood(_food[0], _food[1]); //먹이 그려주기
         }
-        isEat = false; // 탱크에 먹혔는지 여부를 다시 초기화
+        isEat = false; // 먹혀서 새로 만든 먹이의 먹힘 여부를 초기화
     }
 
     /*---------------------------------------------------------------------------------*/   // 총알 관련 함수
@@ -177,16 +176,16 @@ class Game
         switch (vector) // 탱크의 방향에 따라 총알 그림 결정
         {
             case Vector.UP:
-                Console.WriteLine("↑");
+                Console.WriteLine("▲");
                 break;
             case Vector.RIGHT:
-                Console.WriteLine("→");
+                Console.WriteLine("▶");
                 break;
             case Vector.DOWN:
-                Console.WriteLine("↓");
+                Console.WriteLine("▼");
                 break;
             case Vector.LEFT:
-                Console.WriteLine("←");
+                Console.WriteLine("◀");
                 break;
         }
     }
@@ -199,27 +198,27 @@ class Game
         {
             for (int i = 1; i <= bulletNum; i++) //모든 총알에 대해서
             {
-                if (tempbulletPos[i][0] >= STARTX - 1 && tempbulletPos[i][0] <= WIDE + 1) // 총알 좌표 게임구역 범위에 있는지 검사
+                if (SumbulletPos[i][0] >= STARTX - 1 && SumbulletPos[i][0] <= WIDE + 1) // 총알 좌표 게임구역 범위에 있는지 검사
                 {
-                    if (tempbulletPos[i][1] >= STARTX - 1 && tempbulletPos[i][1] <= HEIGHT + 1) // 범위에 있으면
+                    if (SumbulletPos[i][1] >= STARTX - 1 && SumbulletPos[i][1] <= HEIGHT + 1) // 범위에 있으면
                     {
                         switch (SumVector[i - 1]) // 모든 총알이 발사된 총알의 방향에 따라서 이동
                         {
                             case Vector.UP: //발사된 총알의 방향이 위라면
-                                WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
-                                tempbulletPos[i][1]--; // 위쪽으로 계속 이동
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                SumbulletPos[i][1]--; // 위쪽으로 계속 이동
                                 break;
                             case Vector.RIGHT: //발사된 총알의 방향이 오른쪽이라면
-                                WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
-                                tempbulletPos[i][0]++; // 오른쪽으로 계속 이동
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                SumbulletPos[i][0]++; // 오른쪽으로 계속 이동
                                 break;
                             case Vector.DOWN: //발사된 총알의 방향이 아래라면
-                                WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
-                                tempbulletPos[i][1]++; // 아래쪽으로 계속 이동
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                SumbulletPos[i][1]++; // 아래쪽으로 계속 이동
                                 break;
                             case Vector.LEFT: //발사된 총알의 방향이 왼쪽이라면
-                                WriteBullet(tempbulletPos[i][0], tempbulletPos[i][1]); // 총알 그림 찍어주고
-                                tempbulletPos[i][0]--; // 왼쪽으로 계속 이동
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                SumbulletPos[i][0]--; // 왼쪽으로 계속 이동
                                 break;
                         }
                     }
@@ -247,23 +246,23 @@ class Game
         {
             bulletNum = 0; //자동 장전(총알 초기화)
         }
-        tempbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
+        SumbulletPos[bulletNum] = new int[] { _bulletPos[0], _bulletPos[1] }; //총알 좌표 추가
         SumVector[bulletNum] = vector; // 총알 방향 추가
 
-        // tempbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
-        // tempbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
-        // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : tempbulletPos[3][0] 
+        // SumbulletPos[총알 개수][0] : (총알개수)번쨰의 총알의 X좌표
+        // SumbulletPos[총알 개수][1] : (총알개수)번쨰의 총알의 Y좌표
+        // (EX) 총알 3번쨰에 쏜 총알의 X 좌표 : SumbulletPos[3][0] 
     }
     /*---------------------------------------------------------------------------------*/     //탱크 관련 함수
 
-    // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 0을 찍는 함수
+    // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 문자를 찍는 함수
     public void WriteTank(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
         Console.ForegroundColor = ConsoleColor.Green; // 탱크 색깔은 초록색
         Console.WriteLine("0"); // '0'을 그린다.
     }
-    // 탱크 바주카포를 그리기 위해 좌표를 받아 해당 좌표에 가서 X를 찍는 함수
+    // 탱크 포를 그리기 위해 좌표를 받아 해당 좌표에 가서 문자를 찍는 함수
     public void WriteTank2(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
@@ -306,18 +305,7 @@ class Game
             vector = Vector.UP;
         }
     }
-    public void InspectOneSpin()
-    {
-        if (isSpin) // tab을 눌러서 탱크가 회전하면
-        {
-            vector++; //탱크 방향 변경(UP → RIGHT → DOWN → LEFT → X)
-        }
 
-        //문제점 발생 : tab키가 계속 여러번 눌리는 현상떄문에 이렇게 코드를 작성해도 여러번 돌아가는걸 한번만 돌아가게 할수있는 방법이 생각나지 않음
-
-
-
-    }
 
     // 탱크 좌표 게임창 범위에 있는지 검사 후 끝에 있는 값으로 초기화(게임구역 벗어나지 못하게) 하는 함수
     public void InspectTankPos(int[] _tankpos)
@@ -419,8 +407,6 @@ class Game
                 SumBulletPos(bulletPos); // 발사된 총알 좌표 추가
                 break;
             case ConsoleKey.Tab: // Tab을 누르면 탱크 회전
-                isSpin = !isSpin;
-                InspectOneSpin();
                 ReturnVector(); //X라면은 UP으로 바꾸기(LEFT → Up)
                 break;
 
@@ -428,7 +414,7 @@ class Game
 
         System.Threading.Thread.Sleep(25); //루프 돌기전 0.25초 대기
     }
-
+    /*---------------------------------------------------------------------------------*/  // **메인 함수**
     static void Main(string[] args)
     {
         Game game = new Game(); // Game 객체 생성
