@@ -1,5 +1,4 @@
 using System;
-using System.Windows.Forms;
 
 
 // 일정시간동안 키보드를 이용해 탱크를 움직이게하고 회전해가면서('TAB') 총을 통해 랜덤하게 나온 먹이를 죽이는 프로그램
@@ -59,7 +58,7 @@ class Game
     Vector[] SumVector; // (총알이 발사될 때의) 탱크 방향 집합
     bool isSpin = default;
 
-    KeyEventArgs e;
+
 
 
     public Game()
@@ -111,10 +110,6 @@ class Game
         if (Console.KeyAvailable)  //키 누름을 사용할 수 있으면
         {
             inputKey = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
-            if (e.KeyCode == Keys.F)
-            {
-
-            }
         }
     }
     /*---------------------------------------------------------------------------------*/   // 먹이 관련 함수
@@ -423,9 +418,8 @@ class Game
                 isBullet = true; //총알이 하나라도 발사되었다는 의미
                 SumBulletPos(bulletPos); // 발사된 총알 좌표 추가
                 break;
-            case ConsoleKey.Tab:
-                ConsoleKey.Q: // Tab을 누르면 탱크 회전
-                    isSpin = !isSpin;
+            case ConsoleKey.Tab: // Tab을 누르면 탱크 회전
+                isSpin = !isSpin;
                 InspectOneSpin();
                 ReturnVector(); //X라면은 UP으로 바꾸기(LEFT → Up)
                 break;
@@ -446,7 +440,7 @@ class Game
             game.Input(); // 입력받고
             game.Logic(); // 게임 돌리기
             game.timer++; // 시간 +
-            if (false/*game.timer == 100*/) // 시간 100되면(게임 시간 제한)
+            if (game.timer == 100) // 시간 100되면(게임 시간 제한)
             {
                 game.GameOver(); //게임종료
                 if (game.OneMore()) // 다시할거면
@@ -464,4 +458,4 @@ class Game
 
     }
 }
-}
+
