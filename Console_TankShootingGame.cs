@@ -495,7 +495,7 @@ class Game
             game.Logic(); // 게임 돌리기
             game.ResetKeyNum(); // 입력받은 키 개수 점검
             game.timer++; // 시간 +
-            if (game.timer == 200) // 시간 100되면(게임 제한 시간)
+            if (game.timer == 200) // 시간 200되면(게임 제한 시간)
             {
                 
                 game.GameOver(); //게임종료
