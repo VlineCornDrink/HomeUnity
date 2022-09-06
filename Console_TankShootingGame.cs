@@ -20,8 +20,9 @@ using System;
 // 해결방법 : 입력받는 키를 배열로 전환하고 배열을 초기화해주는 함수를 만들어줌
 // 해결완료 : 총알 1발만 발사하거나 TAB키 한번만 회전이 가능해짐
 
-// 문제점2 : 먹이가 문자로 되어있어 잘 안먹어짐
-// 해결방법 : 먹이의 범위를 크게 만들어 맞히는 범위를 늘려줌
+// 문제점2 : 먹이가 작기도하고 문자로 되어있어 잘 안먹어짐
+// 해결방법 : 먹이의 크기를 키우고 문자 대신 영어 글자로 먹이를 만듬
+// 해결완료 : 먹이가 쉽게 먹어짐
 
 // 문제점3 : 게임을 한번더 했을떄 새로운 게임이 시작되어야하는데
 // 그렇지않고 반복을 계속하게끔 짜서 이전이벤트가 새로운게임에 영향을 미침
@@ -31,26 +32,7 @@ using System;
 
 class Game
 {
-
-    ConsoleKeyInfo[] SuminputKey; // 입력받은 키 집합
-    int keyNum = 0; // 입력받은 키 개수
-
-    int[] tankPos; //탱크 좌표
-
-    int[] bulletPos; // 총알 발사되는 위치 좌표
-    int[][] SumbulletPos; // 모든 총알 좌표 집합
-    int bulletNum = 0; // 발사된 총알 개수
-    int bulletmagazine = 50; //총알 탄창
-    bool isBullet = false; // 총알 발사 여부
-
-    int score = 0; // 게임 점수
-
-    Random random = new Random();
-    int[] food = new int[2]; //먹이 변수
-    bool isEat = false; // 탱크에 먹혔는지 여부
-
-    int timer = 0; // 게임 제한시간
-
+    /*-------------------------------------------------------------------*/  // 꾸미기 관련 변수 
     // 게임창 좌표 : (1,1)~ (40,1)
     //                 |      |
     //               (1,20)~(40,20)
@@ -59,23 +41,40 @@ class Game
     const int WIDE = 40;  // 게임 구역 종료지점 X좌표
     const int HEIGHT = 20; // 게임 구역 종료지접 Y좌표
 
+    /*-------------------------------------------------------------------*/   // 키 관련 변수 
+    ConsoleKeyInfo[] SuminputKey; // 입력받은 키 집합
+    int keyNum = 0; // 입력받은 키 개수
+
+    /*-------------------------------------------------------------------*/  // 먹이 관련 변수 
+    Random random = new Random();
+    int[] food = new int[2]; //먹이 변수
+    bool isEat = false; // 탱크에 먹혔는지 여부
+
+    /*-------------------------------------------------------------------*/   // 총알 관련 변수 
+    int[] bulletPos; // 총알 발사되는 위치 좌표
+    int[][] SumbulletPos; // 모든 총알 좌표 집합
+    int bulletNum = 0; // 발사된 총알 개수
+    int bulletmagazine = 50; //총알 탄창
+    bool isBullet = false; // 총알 발사 여부
+
+    /*-------------------------------------------------------------------*/   // 탱크 관련 변수 
     enum Vector { UP, RIGHT, DOWN, LEFT, X }
     Vector vector; // 탱크 방향
     Vector[] SumVector; // (총알이 발사될 때의) 탱크 방향 집합
+    int[] tankPos; //탱크 좌표
 
-    
+    /*-------------------------------------------------------------------*/  // 게임 설명 및 게임 결과 관련 변수
+    int score = 0; // 게임 점수
+    int timer = 0; // 게임 제한시간
 
-
-
-
-    public Game()
+    public Game() 
     {
         tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
         bulletPos = new int[2]; //bulletPos[0] : 발사 총알 위치의 X좌표 , bulletPos[1] : 발사 총알 위치의 Y좌표
         SumbulletPos = new int[bulletmagazine][]; //총알 탄창 개수만큼의 모든 총알 좌표 집합
         SumVector = new Vector[bulletmagazine]; // 총알 탄창 개수만큼의 (총알이 발사될 때의) 탱크 방향 집합
         food = new int[] { 10, 10 }; //먹이 초기 위치
-        SuminputKey = new ConsoleKeyInfo[50]; 
+        SuminputKey = new ConsoleKeyInfo[50]; // 입력받은 키 집합 크기는 임의로 50
 
         Console.CursorVisible = false; // 깜빡이는 커서 안보이게
     }
@@ -85,13 +84,12 @@ class Game
     public void ConsoleSetting()
     {
         Console.Title = "Tank Shooting Game"; // 콘솔창 이름
-        Console.SetWindowSize(WIDE + 20, HEIGHT + 20); // 콘솔창 크기는 게임구역 크기보다 더 크게
-        Console.BackgroundColor = ConsoleColor.Black; // 콘솔창 배경화면 : 검정색
+        Console.SetWindowSize(WIDE + 30, HEIGHT +10 ); // 콘솔창 크기는 게임구역 크기보다 더 크게
     }
     // 게임 구역 그리기
     public void ConsoleBackGround()
     {
-        Console.ForegroundColor = ConsoleColor.White;  // 게임구역 둘레 색깔 : 하얀색
+        Console.ForegroundColor = ConsoleColor.Red;  // 게임구역 둘레 색깔 : 빨간색
         for (int i = 0; i < WIDE + 1; i++) // 게임 구역 그리기
         {
             Console.SetCursorPosition(i, 0);
@@ -123,36 +121,67 @@ class Game
     public void ResetKeyNum()
     {
         keyNum++; // 입력받은 키 개수 1 증가
-        if (keyNum == 50) // 배열의 범위를 벗어나면
+        if (keyNum == 50) // SuminputKey 배열의 범위를 벗어나면
         {
             Array.Clear(SuminputKey, 0, 50); // 배열 비우고
             keyNum = 0; // 개수 초기화
         }
     }
     /*---------------------------------------------------------------------------------*/   // 먹이 관련 함수
-    // 먹이 좌표로 가서 먹이 모양 그리는 함수
+    // 먹이 몸통을 그리기 위해 좌표를 받아 좌표에 가서 'W'를 찍는 함수
     public void WriteFood(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
-        Console.ForegroundColor = ConsoleColor.Red; //먹이 색깔은 빨간색
-        Console.WriteLine("W"); // '()'을 그린다.
+        Console.ForegroundColor = ConsoleColor.Cyan; //먹이 색깔은 녹청색
+        Console.WriteLine("W"); // 'W'을 그린다.
+    }
+    // 먹이 다리를 그리기 위해 좌표를 받아 좌표에 가서 'M'를 찍는 함수
+    public void WriteFood2(int x, int y)
+    {
+        Console.SetCursorPosition(x, y); // x,y 로 가서
+        Console.ForegroundColor = ConsoleColor.Cyan; //먹이 색깔은 녹청색
+        Console.WriteLine("M"); // 'M'을 그린다.
     }
     //모든 먹이들을 그리는 함수
     public void DrawFood(int[] _food)
     {
         for (int i = 1; i <= bulletNum; i++) // 모든 총알에 대해서
         {
-            if ((_food[0] == SumbulletPos[i][0]) && (_food[1] == SumbulletPos[i][1]))  // 먹이랑 부딪혔을 때(충돌)
+            if ((_food[0] == SumbulletPos[i][0]) && (_food[1] == SumbulletPos[i][1]))  // 먹이랑 부딪혔을 때 경우1 (충돌)
             {
                 isEat = true; // 먹혔으므로
                 _food[0] = random.Next(STARTX, WIDE); //먹이변수의 X좌표 다시 랜덤 할당
                 _food[1] = random.Next(STARTY, HEIGHT); //먹이변수의 Y좌표 다시 랜덤 할당
                 score++; //점수 증가
             }
+            if ((_food[0] == SumbulletPos[i][0]) && (_food[1] + 1 == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우2 (충돌)
+            {
+                isEat = true; 
+                _food[0] = random.Next(STARTX, WIDE); 
+                _food[1] = random.Next(STARTY, HEIGHT); 
+                score++; 
+            }
+            if ((_food[0] + 1 == SumbulletPos[i][0]) && (_food[1] == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우3 (충돌)
+            {
+                isEat = true;
+                _food[0] = random.Next(STARTX, WIDE);
+                _food[1] = random.Next(STARTY, HEIGHT); 
+                score++; 
+            }
+            if ((_food[0] + 1 == SumbulletPos[i][0]) && (_food[1] + 1 == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우4 (충돌)
+            {
+                isEat = true; 
+                _food[0] = random.Next(STARTX, WIDE); 
+                _food[1] = random.Next(STARTY, HEIGHT); 
+                score++; 
+            }
         }
         if (!isEat) // 먹히지 않았으면
         {
             WriteFood(_food[0], _food[1]); //먹이 그려주기
+            WriteFood2(_food[0], _food[1]+1);
+            WriteFood(_food[0]+1, _food[1]); 
+            WriteFood2(_food[0]+1, _food[1]+1); 
         }
         isEat = false; // 먹혀서 새로 만든 먹이의 먹힘 여부를 초기화
     }
@@ -186,12 +215,12 @@ class Game
     }
 
 
-    // 좌표를 받아 해당 좌표에 가서 총알그림(▲,▶,▼,◀)을 찍는 함수
-    public void WriteBullet(int x, int y)
+    // 좌표와 탱크 방향 인덱스를 받아 해당 좌표에 가서 탱크 방향에 따라 총알그림(▲,▶,▼,◀)을 찍는 함수
+    public void WriteBullet(int x, int y,int number)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow; // 총알 색깔 : 노란색
+        Console.ForegroundColor = ConsoleColor.Green; // 총알 색깔 : 녹색
         Console.SetCursorPosition(x, y); // x,y 로 가서 
-        switch (vector) // 탱크의 방향에 따라 총알 그림 결정
+        switch (SumVector[number]) // 탱크의 방향에 따라 총알 그림 결정
         {
             case Vector.UP:
                 Console.WriteLine("▲");
@@ -220,22 +249,22 @@ class Game
                 {
                     if (SumbulletPos[i][1] >= STARTX - 1 && SumbulletPos[i][1] <= HEIGHT + 1) // 범위에 있으면
                     {
-                        switch (SumVector[i - 1]) // 모든 총알이 발사된 총알의 방향에 따라서 이동
+                        switch (SumVector[i]) // 모든 총알이 발사된 총알의 방향에 따라서 이동
                         {
                             case Vector.UP: //발사된 총알의 방향이 위라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▲ 찍어주고
                                 SumbulletPos[i][1]--; // 위쪽으로 계속 이동
                                 break;
                             case Vector.RIGHT: //발사된 총알의 방향이 오른쪽이라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▶ 찍어주고
                                 SumbulletPos[i][0]++; // 오른쪽으로 계속 이동
                                 break;
                             case Vector.DOWN: //발사된 총알의 방향이 아래라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▼ 찍어주고
                                 SumbulletPos[i][1]++; // 아래쪽으로 계속 이동
                                 break;
                             case Vector.LEFT: //발사된 총알의 방향이 왼쪽이라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1]); // 총알 그림 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ◀ 찍어주고
                                 SumbulletPos[i][0]--; // 왼쪽으로 계속 이동
                                 break;
                         }
@@ -273,18 +302,18 @@ class Game
     }
     /*---------------------------------------------------------------------------------*/     //탱크 관련 함수
 
-    // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 문자를 찍는 함수
+    // 탱크를 그리기 위해 좌표를 받아 해당 좌표에 가서 '0'를 찍는 함수
     public void WriteTank(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
-        Console.ForegroundColor = ConsoleColor.Green; // 탱크 색깔은 초록색
+        Console.ForegroundColor = ConsoleColor.Gray; // 탱크 색깔은 회색
         Console.WriteLine("O"); // '0'을 그린다.
     }
-    // 탱크 포를 그리기 위해 좌표를 받아 해당 좌표에 가서 문자를 찍는 함수
+    // 탱크 포를 그리기 위해 좌표를 받아 해당 좌표에 가서 'X'를 찍는 함수
     public void WriteTank2(int x, int y)
     {
         Console.SetCursorPosition(x, y); // x,y 로 가서
-        Console.ForegroundColor = ConsoleColor.Green; // 탱크 포 색깔은 다크초록색
+        Console.ForegroundColor = ConsoleColor.White; // 탱크 포 색깔은 하얀색
         Console.WriteLine("X"); // 'X'을 그린다.
     }
 
@@ -366,25 +395,27 @@ class Game
 
     }
 
-    /*---------------------------------------------------------------------------------*/  // 게임 설명 및 게임 결과
+    /*---------------------------------------------------------------------------------*/  // 게임 설명 및 게임 결과 관련 함수
 
     // 게임 시작전 출력할 내용 함수
     public void GameStart()
     {
         Console.SetCursorPosition(0, HEIGHT / 2);
-        Console.ForegroundColor = ConsoleColor.White; // 글씨 하얀색으로 작성
+        Console.ForegroundColor = ConsoleColor.Green; // 글씨 녹색으로 작성
         Console.WriteLine("Tank Shooting Game");
         Console.WriteLine("(탱크 이동 : w,a,s,d / 총알 발사 : spacebar / 탱크 회전 : tab)");
-        Console.ForegroundColor = ConsoleColor.Red; // 글씨 빨간색으로 작성
+        Console.ForegroundColor = ConsoleColor.White; // 글씨 하얀색으로 작성
         Console.WriteLine("게임을 시작하실려면 ENTER를 누르시오...");
         Console.ReadLine();
+        Console.BackgroundColor = ConsoleColor.Blue; // 콘솔창 배경화면 : 파란색
     }
     // 게임이 끝난뒤 콘솔에 출력할 내용 함수
     public void GameOver()
     {
+        Console.BackgroundColor = ConsoleColor.Black; // 콘솔창 배경화면 : 검은색
         Console.Clear();
         Console.SetCursorPosition(0, HEIGHT / 2);
-        Console.ForegroundColor = ConsoleColor.Yellow; // 글씨 노란색으로 작성
+        Console.ForegroundColor = ConsoleColor.Green; // 글씨 노란색으로 작성
         Console.WriteLine("GAME OVER!");
         Console.WriteLine("Score : " + score);
     }
@@ -394,6 +425,7 @@ class Game
     {
         while (true) // 사용자가 "yes" 또는 "no" 를 입력하기 전까지 반복 계속
         {
+            Console.ForegroundColor = ConsoleColor.White; // 글씨 하얀새으로 작성
             Console.Write("한번 더 하시겠습니까? ( Yes / No )");
             string answer = Console.ReadLine();
             if (answer.ToLower() == "yes") // 대답 yes 이면 게임 다시 시작
@@ -455,21 +487,23 @@ class Game
     {
         Game game = new Game(); // Game 객체 생성
 
-        game.GameStart(); // 게임 시작
         game.ConsoleSetting(); // 콘솔창 세팅
+        game.GameStart(); // 게임 시작
         while (true)//무한 루프
         {
             game.Input(); // 입력받고
             game.Logic(); // 게임 돌리기
             game.ResetKeyNum(); // 입력받은 키 개수 점검
             game.timer++; // 시간 +
-            if (game.timer == 100) // 시간 100되면(게임 제한 시간)
+            if (game.timer == 200) // 시간 100되면(게임 제한 시간)
             {
+                
                 game.GameOver(); //게임종료
                 if (game.OneMore()) // 다시할거면
                 {
                     game.timer = 0; // 시간 초기화
                     game.score = 0; //점수 초기화
+                    Console.BackgroundColor = ConsoleColor.Blue; // 콘솔창 배경화면 : 파란색
                     continue; // 계속 반복
                 }
                 else
