@@ -116,10 +116,10 @@ class Game
     {
         if (Console.KeyAvailable)  //키 누름을 사용할 수 있으면
         {
-            SuminputKey[keyNum] = Console.ReadKey(true); //키를 입력아서 받은 키를 inputKey에 할당
+            SuminputKey[keyNum] = Console.ReadKey(true); //키를 입력아서 받은 키를 SuminputKey 배열에 추가
         }
     }
-    // 입력받은 키 개수를 올리고 SuminputKey 배열의 범위를 벗어나면 개수 초기화하는 함수
+    // 입력받은 키 개수 초기화 및 배열 초기화하는 함수
     public void ResetKeyNum()
     {
         keyNum++; // 입력받은 키 개수 1 증가
@@ -461,7 +461,7 @@ class Game
         {
             game.Input(); // 입력받고
             game.Logic(); // 게임 돌리기
-            game.ResetKeyNum(); // 입력 점검
+            game.ResetKeyNum(); // 입력받은 키 개수 점검
             game.timer++; // 시간 +
             if (game.timer == 100) // 시간 100되면(게임 제한 시간)
             {
