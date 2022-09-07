@@ -24,14 +24,17 @@ using System;
 // 해결방법 : 먹이의 크기를 키우고 문자 대신 영어 글자로 먹이를 만듬
 // 해결완료 : 먹이가 쉽게 먹어짐
 
+// 문제점3 : 깜빡이는게 심한데 덜하게끔
+// 해결방법:
+// 해결완료:
+
+// 개선점1 : 먹이(적)이 움직이면 더 좋을것 같다
+// 개선점2 : 탱크의 이동방향에 따라 회전하면서 자동발사되게끔
+// 개선점3 : 코드 지저분 ( 코드 정리 ) ( 접근제한자라든지 아니면 여러 클래스로 구분할 수 있는지확인)
 
 //일단 영상 개인 유튜브에 올려주시고
 //나중에 포트폴리오로 활용하시면 될 것 같습니다.
-//그리고
-//적이 움직이면 더 좋을 것 같고
-//탱크가 이동방향에 따라 회전하도록 수정이 필요해보입니다.
-//그리고 깜박이는게 심한데 이부분만 수정하시면 될 것 같아요
-// 코드 정리 ( 접근제한자라든지 아니면 여러 클래스로 구분할 수 있는지확인)
+
 
 
 class Game
@@ -71,7 +74,7 @@ class Game
     int score = 0; // 게임 점수
     int timer = 0; // 게임 제한시간
 
-    public Game() 
+    public Game()
     {
         tankPos = new int[] { 5, 5 }; // 탱크 초기 위치
         bulletPos = new int[2]; //bulletPos[0] : 발사 총알 위치의 X좌표 , bulletPos[1] : 발사 총알 위치의 Y좌표
@@ -88,7 +91,7 @@ class Game
     public void ConsoleSetting()
     {
         Console.Title = "Tank Shooting Game"; // 콘솔창 이름
-        Console.SetWindowSize(WIDE + 30, HEIGHT +10 ); // 콘솔창 크기는 게임구역 크기보다 더 크게
+        Console.SetWindowSize(WIDE + 30, HEIGHT + 10); // 콘솔창 크기는 게임구역 크기보다 더 크게
     }
     // 게임 구역 그리기
     public void ConsoleBackGround()
@@ -160,32 +163,32 @@ class Game
             }
             if ((_food[0] == SumbulletPos[i][0]) && (_food[1] + 1 == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우2 (충돌)
             {
-                isEat = true; 
-                _food[0] = random.Next(STARTX, WIDE); 
-                _food[1] = random.Next(STARTY, HEIGHT); 
-                score++; 
+                isEat = true;
+                _food[0] = random.Next(STARTX, WIDE);
+                _food[1] = random.Next(STARTY, HEIGHT);
+                score++;
             }
             if ((_food[0] + 1 == SumbulletPos[i][0]) && (_food[1] == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우3 (충돌)
             {
                 isEat = true;
                 _food[0] = random.Next(STARTX, WIDE);
-                _food[1] = random.Next(STARTY, HEIGHT); 
-                score++; 
+                _food[1] = random.Next(STARTY, HEIGHT);
+                score++;
             }
             if ((_food[0] + 1 == SumbulletPos[i][0]) && (_food[1] + 1 == SumbulletPos[i][1])) // 먹이랑 부딪혔을 때 경우4 (충돌)
             {
-                isEat = true; 
-                _food[0] = random.Next(STARTX, WIDE); 
-                _food[1] = random.Next(STARTY, HEIGHT); 
-                score++; 
+                isEat = true;
+                _food[0] = random.Next(STARTX, WIDE);
+                _food[1] = random.Next(STARTY, HEIGHT);
+                score++;
             }
         }
         if (!isEat) // 먹히지 않았으면
         {
             WriteFood(_food[0], _food[1]); //먹이 그려주기
-            WriteFood2(_food[0], _food[1]+1);
-            WriteFood(_food[0]+1, _food[1]); 
-            WriteFood2(_food[0]+1, _food[1]+1); 
+            WriteFood2(_food[0], _food[1] + 1);
+            WriteFood(_food[0] + 1, _food[1]);
+            WriteFood2(_food[0] + 1, _food[1] + 1);
         }
         isEat = false; // 먹혀서 새로 만든 먹이의 먹힘 여부를 초기화
     }
@@ -220,7 +223,7 @@ class Game
 
 
     // 좌표와 탱크 방향 인덱스를 받아 해당 좌표에 가서 탱크 방향에 따라 총알그림(▲,▶,▼,◀)을 찍는 함수
-    public void WriteBullet(int x, int y,int number)
+    public void WriteBullet(int x, int y, int number)
     {
         Console.ForegroundColor = ConsoleColor.Green; // 총알 색깔 : 녹색
         Console.SetCursorPosition(x, y); // x,y 로 가서 
@@ -256,19 +259,19 @@ class Game
                         switch (SumVector[i]) // 모든 총알이 발사된 총알의 방향에 따라서 이동
                         {
                             case Vector.UP: //발사된 총알의 방향이 위라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▲ 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1], i); // 총알 그림 ▲ 찍어주고
                                 SumbulletPos[i][1]--; // 위쪽으로 계속 이동
                                 break;
                             case Vector.RIGHT: //발사된 총알의 방향이 오른쪽이라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▶ 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1], i); // 총알 그림 ▶ 찍어주고
                                 SumbulletPos[i][0]++; // 오른쪽으로 계속 이동
                                 break;
                             case Vector.DOWN: //발사된 총알의 방향이 아래라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ▼ 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1], i); // 총알 그림 ▼ 찍어주고
                                 SumbulletPos[i][1]++; // 아래쪽으로 계속 이동
                                 break;
                             case Vector.LEFT: //발사된 총알의 방향이 왼쪽이라면
-                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1],i); // 총알 그림 ◀ 찍어주고
+                                WriteBullet(SumbulletPos[i][0], SumbulletPos[i][1], i); // 총알 그림 ◀ 찍어주고
                                 SumbulletPos[i][0]--; // 왼쪽으로 계속 이동
                                 break;
                         }
@@ -336,18 +339,18 @@ class Game
                 WriteTank(_tankPos[0] + 1, _tankPos[1] + 2);
                 break;
             case Vector.RIGHT: //탱크 방향 : 오른쪽
-                WriteTank(_tankPos[0]-1, _tankPos[1] - 1);
-                WriteTank(_tankPos[0]-1, _tankPos[1]);
-                WriteTank(_tankPos[0]-1, _tankPos[1] + 1);
+                WriteTank(_tankPos[0] - 1, _tankPos[1] - 1);
+                WriteTank(_tankPos[0] - 1, _tankPos[1]);
+                WriteTank(_tankPos[0] - 1, _tankPos[1] + 1);
                 WriteTank(_tankPos[0], _tankPos[1] - 1);
                 WriteTank(_tankPos[0], _tankPos[1]);
                 WriteTank(_tankPos[0], _tankPos[1] + 1);
                 WriteTank2(_tankPos[0] + 1, _tankPos[1]);
                 break;
             case Vector.DOWN: //탱크 방향 : 아래쪽
-                WriteTank(_tankPos[0], _tankPos[1]-1);
-                WriteTank(_tankPos[0] + 1, _tankPos[1]-1);
-                WriteTank(_tankPos[0] + 2, _tankPos[1]-1);
+                WriteTank(_tankPos[0], _tankPos[1] - 1);
+                WriteTank(_tankPos[0] + 1, _tankPos[1] - 1);
+                WriteTank(_tankPos[0] + 2, _tankPos[1] - 1);
                 WriteTank(_tankPos[0], _tankPos[1]);
                 WriteTank(_tankPos[0] + 1, _tankPos[1]);
                 WriteTank(_tankPos[0] + 2, _tankPos[1]);
@@ -501,7 +504,7 @@ class Game
             game.timer++; // 시간 +
             if (game.timer == 200) // 시간 200되면(게임 제한 시간)
             {
-                
+
                 game.GameOver(); //게임종료
                 if (game.OneMore()) // 다시할거면
                 {
